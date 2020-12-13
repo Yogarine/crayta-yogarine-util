@@ -46,9 +46,7 @@ Util = {}
 ---
 -- Script properties are defined here
 ---
-Util.Properties = {
-    --	{ name = "globalName", type = "string", tooltip = "Name for Util class in the global scope.", default = "Util"},
-}
+Util.Properties = {}
 
 ---
 -- Get average of all the values in the given table.
@@ -57,7 +55,7 @@ Util.Properties = {
 -- @return Averaged value.
 ---
 function Util.Average(collection)
-    local sum = nil
+    local sum
 
     for _,value in ipairs(collection) do
         if nil == sum then
@@ -71,6 +69,19 @@ function Util.Average(collection)
 end
 
 ---
+-- Returns the tickrate based on where this code is running.
+--
+-- @treturn number
+---
+function Util.GetTickRate()
+    if IsServer() then
+        return 30
+    else
+        return 60
+    end
+end
+
+---
 -- Inject a value into the global scope.
 --
 -- @param                value
@@ -78,8 +89,6 @@ end
 -- @tparam       string  name
 ---
 function Util.InjectGlobal(value, ...)
-    Printf("Util: InjectGlobal {1}", table.concat({...}, ","))
-
     local args = {...}
     local name = table.remove(args)
 
@@ -94,7 +103,11 @@ function Util.InjectGlobal(value, ...)
     G[name] = value
 end
 
-
+---
+-- Recursively dumps the given variable in the console.
+--
+-- @param  data
+---
 function Util.DumpVar(data)
     -- cache of tables already printed, to avoid infinite recursive loops
     local tablecache = {}
@@ -131,7 +144,54 @@ function Util.DumpVar(data)
     Print(buffer)
 end
 
--- Util.InjectGlobal(Util, "Yogarine", "Util")
--- Util.InjectGlobal(Util, "Util")
+---
+-- Generate a UUID.
+--
+-- @treturn string
+---
+function Util:GenerateUuid()
+    math.randomseed(GetWorld():GetServerTime())
+
+    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+
+    return string.gsub(template, '[xy]', function (c)
+        local v = (c == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
+        return string.format('%x', v)
+    end)
+end
+
+---
+-- @tparam  Event   event
+-- @tparam  Script  listenerScriptComponent
+-- @tparam  string  functionName
+---
+function Util:ListenToLocalEvent(event, listenerScriptComponent, functionName)
+    if not IsClient() or not self:GetEntity():IsLocal() then
+        self:SendToLocal("ListenToLocalEvent", event, listenerScriptComponent, functionName)
+    end
+
+    event:Listen(listenerScriptComponent, functionName)
+end
+
+---
+-- @tparam  number  count
+-- @tparam  number  limit
+-- @tparam  string  errorMessage
+-- @treturn number
+---
+function Util.Timeout(count, limit, errorMessage)
+    limit        = limit or 300
+    errorMessage = errorMessage or "Timed out after " .. count .. " tries"
+
+    count = count + 1
+    if count > limit then
+        error(errorMessage)
+    end
+
+    return count
+end
+
+Util.InjectGlobal(Util, "Yogarine", "Util")
+Util.InjectGlobal(Util, "Yo", "Util")
 
 return Util

@@ -44,13 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Stack = {}
 
 ---
--- Script properties are defined here
----
-Stack.Properties = {
-	--	{ name = "globalName", type = "string", tooltip = "Name for Stack class in the global scope.", default = "Stack"},
-}
-
----
 -- Creates a new Stack.
 ---
 function Stack:New(size, startingIndex)
@@ -115,7 +108,7 @@ function Stack:Average()
 	return self.Util.Average(self)
 end
 
--- Util.InjectGlobal(Stack, "Yogarine", "Stack")
--- Util.InjectGlobal(Stack, "Stack")
+Yo.Util.InjectGlobal(Stack, "Yogarine", "Stack")
+Yo.Util.InjectGlobal(Stack, "Yo", "Stack")
 
 return Stack
