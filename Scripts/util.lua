@@ -55,18 +55,37 @@ Util.Properties = {}
 -- @return Averaged value.
 ---
 function Util.Average(collection)
-    local sum
+  local sum = nil
 
-    for _,value in ipairs(collection) do
-        if nil == sum then
-            sum = value
-        else
-            sum = sum + value
-        end
+  for _,value in ipairs(collection) do
+    if nil == sum then
+      sum = value
+    else
+      if sum.x == nil then
+        sum.pitch = sum.pitch + value.pitch
+        sum.yaw = sum.yaw + value.yaw
+        sum.roll = sum.roll + value.roll
+      else
+        sum.x = sum.x + value.x 
+        sum.y =  sum.y + value.y
+        sum.z = sum.z + value.z
+      end
     end
+  end
+ 
+  if sum.x == nil then
+    sum.pitch = sum.pitch / #collection
+    sum.yaw = sum.yaw / #collection
+    sum.roll = sum.roll / #collection
+  else
+    sum.x = sum.x / #collection 
+    sum.y =  sum.y / #collection
+    sum.z = sum.z / #collection
+  end
 
-    return sum / #collection
+  return sum
 end
+
 
 ---
 -- Returns the tickrate based on where this code is running.
